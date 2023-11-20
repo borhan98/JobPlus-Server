@@ -11,6 +11,7 @@ console.log(process.env.DB_USER, process.env.DB_PASS);
          Middleware 
 -------------------------------*/
 app.use(cors());
+app.use(express.json());
 
 const uri = "mongodb+srv://borhanuddindns420:j3Ds2nNCbxqSgznf@cluster0.dumb7x3.mongodb.net/?retryWrites=true&w=majority";
 
@@ -33,7 +34,7 @@ async function run() {
             let query = {};
             let result = [];
             if (req.query.category) {
-                query = { job_category: req.query.category }
+                query = { job_category: req.query.category };
                 result = await jobCollection.find(query).toArray();
             } else {
                 result = [];
@@ -46,6 +47,12 @@ async function run() {
             const id = req.params.id;
             const query = {_id: new ObjectId(id)};
             const result = await jobCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.post("/jobs", async (req, res) => {
+            const newJob = req.body;
+            const result = await jobCollection.insertOne(newJob);
             res.send(result);
         })
 
