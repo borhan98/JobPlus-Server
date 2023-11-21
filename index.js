@@ -68,6 +68,7 @@ async function run() {
             const job = req.body;
             const query = { _id: new ObjectId(id) };
             const options = { upsert: true };
+            let result;
             const updatedJob = {
                 $set: {
                     job_title: job.job_title,
@@ -82,7 +83,15 @@ async function run() {
                     image: job.image,
                 }
             };
-            const result = await jobCollection.updateOne(query, updatedJob, options);
+
+            if (job.increaseApplicant === 1) {
+                const updateApplicant = {
+                    $inc: { total_applied: job.increaseApplicant }
+                }
+                result = await jobCollection.updateOne(query, updateApplicant, options);               
+            } else {
+                result = await jobCollection.updateOne(query, updatedJob, options);
+            }
             res.send(result)
         })
 
@@ -96,6 +105,12 @@ async function run() {
         /*------------------------------------------------
                         applications related APIs 
         --------------------------------------------------*/
+        app.get("/applications/:jobId", async (req, res) => {
+            const jobId = req.params.jobId;
+            const query = {jobId};
+            const result = await applicationCollection.findOne(query);
+            res.send(result)
+        })
 
         app.post("/applications", async (req, res) => {
             const newApplication = req.body;
