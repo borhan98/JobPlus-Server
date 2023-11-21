@@ -31,10 +31,14 @@ async function run() {
         const jobCollection = client.db("JobPlus").collection("jobs");
 
         app.get("/jobs", async (req, res) => {
+            
             let query = {};
             let result = [];
             if (req.query.category) {
                 query = { job_category: req.query.category };
+                result = await jobCollection.find(query).toArray();
+            } else if (req.query.email) {
+                query = { author_email: req.query.email};
                 result = await jobCollection.find(query).toArray();
             } else {
                 result = [];
@@ -55,7 +59,6 @@ async function run() {
             const result = await jobCollection.insertOne(newJob);
             res.send(result);
         })
-
 
 
 
