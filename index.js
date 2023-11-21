@@ -29,9 +29,12 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
         const jobCollection = client.db("JobPlus").collection("jobs");
+        const applicationCollection = client.db("JobPlus").collection("applications");
 
+        /*------------------------------------------------
+                        Jobs related APIs 
+        --------------------------------------------------*/
         app.get("/jobs", async (req, res) => {
-
             let query = {};
             let result = [];
             if (req.query.category) {
@@ -90,6 +93,15 @@ async function run() {
             res.send(result);
         })
 
+        /*------------------------------------------------
+                        applications related APIs 
+        --------------------------------------------------*/
+
+        app.post("/applications", async (req, res) => {
+            const newApplication = req.body;
+            const result = await applicationCollection.insertOne(newApplication);
+            res.send(result);
+        })
 
 
 
