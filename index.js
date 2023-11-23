@@ -24,17 +24,16 @@ app.use(cookieParser())
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
-        return res.status(401).send({message: "You are not authorized user"})
+        return res.status(401).send({ message: "You are not authorized user" })
     }
     jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
         if (err) {
-            return res.status(401).send({message: "Unauthorized access"});
+            return res.status(401).send({ message: "Unauthorized access" });
         }
         req.user = decoded;
         next();
     })
 }
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dumb7x3.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -56,18 +55,22 @@ async function run() {
         const featureJobsCollection = client.db("JobPlus").collection("featureJobs");
 
         /*------------------------------------------------
-                        Jobs related APIs 
+                        Auth related APIs 
         --------------------------------------------------*/
         app.post("/jwt", async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.SECRET_TOKEN, { expiresIn: "1h"});
+            const token = jwt.sign(user, process.env.SECRET_TOKEN, { expiresIn: "1h" });
             res
-            .cookie('token', token, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-            })
-            .send({success: true});
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "none",
+                })
+                .send({ success: true });
+        })
+
+        app.post("/logout", async (req, res) => {
+            res.clearCookie("token", {maxAge: 0}).send({success: true});            
         })
 
         /*------------------------------------------------
@@ -155,9 +158,8 @@ async function run() {
         app.get("/applications", verifyUser, async (req, res) => {
             const user = req?.user?.email;
             if (req?.user?.email !== req.query.email) {
-                return res.status(403).send({message: "Forbidden access"});
+                return res.status(403).send({ message: "Forbidden access" });
             }
-
             let query = {};
             let result = [];
             if (req.query.email) {
@@ -190,8 +192,6 @@ async function run() {
             const result = await featureJobsCollection.find().toArray();
             res.send(result);
         })
-
-
 
         // Send a ping to confirm a successful connection
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
